@@ -48,8 +48,12 @@ module Faraday
 
     # Public
     def fetch(key, default = nil)
-      send(key) || send("#{key}=", default ||
-        (block_given? ? Proc.new.call : nil))
+      value = send(key)
+      return value if value
+      new_value = default || (block_given? ? Proc.new.call : nil)
+      # Ruby 2.1 struct returns the object, not the value.
+      send("#{key}=", new_value)
+      new_value
     end
 
     # Public
